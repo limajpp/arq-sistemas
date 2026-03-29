@@ -1,5 +1,6 @@
 import Filter from "../layout/Filter";
 import SearchBar from "../layout/SearchBar";
+import Task from "../layout/Task";
 import Title from "../layout/Title";
 
 const filterOptions = ["all", "pending", "done"];
@@ -24,6 +25,9 @@ export default function Home() {
         selectClassName="px-2 py-0.5 rounded-md bg-gray-200 focus:outline-none"
         selectOptions={filterOptions}
       />
+      <div className="flex flex-col h-full gap-4">
+        <Task className="flex flex-row items-center justify-between rounded-xl border border-gray-300 p-4 bg-gray-50" />
+      </div>
     </div>
   );
 }
