@@ -1,9 +1,12 @@
+import Filter from "../layout/Filter";
 import SearchBar from "../layout/SearchBar";
 import Title from "../layout/Title";
 
+const filterOptions = ["all", "pending", "done"];
+
 export default function Home() {
   return (
-    <div className="flex flex-col h-full w-1/2 gap-6">
+    <div className="flex flex-col h-full w-1/2 gap-8">
       <Title
         titleText="My Tasks"
         titleSubText="Organize and manage your daily tasks"
@@ -14,6 +17,12 @@ export default function Home() {
         placeholder="Search for Tasks..."
         type="text"
         name="search"
+      />
+      <Filter
+        className="flex flex-row items-center w-fit gap-3"
+        spanClassName="text-sm opacity-70"
+        selectClassName="px-2 py-0.5 rounded-md bg-gray-200 focus:outline-none"
+        selectOptions={filterOptions}
       />
     </div>
   );
