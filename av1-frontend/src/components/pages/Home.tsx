@@ -1,3 +1,4 @@
+import AddTaskButton from "../layout/AddTaskButton";
 import Filter from "../layout/Filter";
 import SearchBar from "../layout/SearchBar";
 import Task from "../layout/Task";
@@ -28,6 +29,7 @@ export default function Home() {
       <div className="flex flex-col h-full gap-4">
         <Task className="flex flex-row items-center justify-between rounded-xl border border-gray-300 p-4 bg-gray-50" />
       </div>
+      <AddTaskButton className="ml-auto p-2 rounded-full bg-stone-900 hover:cursor-pointer hover:bg-stone-800" />
     </div>
   );
 }
