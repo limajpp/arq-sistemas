@@ -5,15 +5,29 @@ import Label from "../ui/Label";
 import TextArea from "../ui/TextArea";
 
 type NewTaskDialogContentProps = {
-  taskDone: boolean;
+  title: string;
+  description: string;
+  taskDone: boolean | undefined;
+  onTitleChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
   onToggleTaskDone: () => void;
+  statusMessage?: string;
+  statusType?: "error" | "success";
   onCancel: () => void;
+  onCreate: () => void;
 };
 
 export default function NewTaskDialogContent({
+  title,
+  description,
   taskDone,
+  onTitleChange,
+  onDescriptionChange,
   onToggleTaskDone,
+  statusMessage,
+  statusType,
   onCancel,
+  onCreate,
 }: NewTaskDialogContentProps) {
   return (
     <>
@@ -23,6 +37,8 @@ export default function NewTaskDialogContent({
           <Label className="font-semibold">Title</Label>
           <Input
             required
+            value={title}
+            onChange={(event) => onTitleChange(event.target.value)}
             className="py-1 px-2 rounded-md bg-gray-200 focus:shadow-lg focus:shadow-gray-300 focus:outline-3 focus:outline-gray-300"
           />
         </div>
@@ -30,6 +46,8 @@ export default function NewTaskDialogContent({
           <Label>Description</Label>
           <TextArea
             required
+            value={description}
+            onChange={(event) => onDescriptionChange(event.target.value)}
             className="py-1 px-2 rounded-md bg-gray-200 focus:shadow-lg focus:shadow-gray-300 focus:outline-3 focus:outline-gray-300"
           />
         </div>
@@ -43,6 +61,15 @@ export default function NewTaskDialogContent({
             )}
           </Button>
         </div>
+        {statusMessage && (
+          <p
+            className={`text-sm ${
+              statusType === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {statusMessage}
+          </p>
+        )}
         <div className="flex flex-row justify-end gap-2">
           <Button
             onClick={onCancel}
@@ -50,7 +77,10 @@ export default function NewTaskDialogContent({
           >
             Cancel
           </Button>
-          <Button className="px-4 py-1 rounded-lg text-white bg-stone-950 hover:bg-stone-700 hover:cursor-pointer">
+          <Button
+            onClick={onCreate}
+            className="px-4 py-1 rounded-lg text-white bg-stone-950 hover:bg-stone-700 hover:cursor-pointer"
+          >
             Create
           </Button>
         </div>
