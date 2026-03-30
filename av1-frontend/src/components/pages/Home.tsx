@@ -24,6 +24,7 @@ type Feedback = {
 export default function Home() {
   const [tasksList, setTasksList] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const modalRef = useRef<DialogHandle | null>(null);
   const [modal, setModal] = useState<boolean>(false);
   const [task, setTask] = useState<Task>({
@@ -76,6 +77,13 @@ export default function Home() {
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredTasks = tasksList.filter((task) => {
+    const matchesFilter =
+      selectedFilter === "all" ||
+      (selectedFilter === "pending" && !task.done) ||
+      (selectedFilter === "done" && task.done);
+
+    if (!matchesFilter) return false;
+
     if (!normalizedQuery) return true;
 
     return (
@@ -105,6 +113,8 @@ export default function Home() {
           spanClassName="text-sm opacity-70"
           selectClassName="px-2 py-0.5 rounded-md bg-gray-200 focus:outline-none"
           selectOptions={filterOptions}
+          value={selectedFilter}
+          onChange={(event) => setSelectedFilter(event.target.value)}
         />
         <div className="flex flex-col h-full gap-4">
           {filteredTasks.length !== 0 ? (
