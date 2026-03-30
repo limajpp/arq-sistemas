@@ -23,6 +23,7 @@ type Feedback = {
 
 export default function Home() {
   const [tasksList, setTasksList] = useState<Task[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const modalRef = useRef<DialogHandle | null>(null);
   const [modal, setModal] = useState<boolean>(false);
   const [task, setTask] = useState<Task>({
@@ -73,6 +74,16 @@ export default function Home() {
     }
   }
 
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredTasks = tasksList.filter((task) => {
+    if (!normalizedQuery) return true;
+
+    return (
+      task.title.toLowerCase().includes(normalizedQuery) ||
+      task.description.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
   return (
     <>
       <div className="flex flex-col h-full w-1/2 gap-8">
@@ -86,6 +97,8 @@ export default function Home() {
           placeholder="Search for Tasks..."
           type="text"
           name="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
         />
         <Filter
           className="flex flex-row items-center w-fit gap-3"
@@ -94,8 +107,8 @@ export default function Home() {
           selectOptions={filterOptions}
         />
         <div className="flex flex-col h-full gap-4">
-          {tasksList.length !== 0 ? (
-            tasksList.map((task, index) => (
+          {filteredTasks.length !== 0 ? (
+            filteredTasks.map((task, index) => (
               <Task
                 key={`${task.title}-${index}`}
                 title={task.title}
@@ -107,7 +120,11 @@ export default function Home() {
           ) : (
             <div className="flex flex-row gap-2 m-auto">
               <Frown className="opacity-70" />
-              <p className="m-auto opacity-70">No Tasks here...</p>
+              <p className="m-auto opacity-70">
+                {tasksList.length === 0
+                  ? "No Tasks here..."
+                  : "No matching tasks found..."}
+              </p>
             </div>
           )}
         </div>
