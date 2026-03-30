@@ -8,30 +8,34 @@ type NewTaskDialogContentProps = {
   title: string;
   description: string;
   taskDone: boolean | undefined;
+  heading: string;
+  submitLabel: string;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onToggleTaskDone: () => void;
   statusMessage?: string;
   statusType?: "error" | "success";
   onCancel: () => void;
-  onCreate: () => void;
+  onSubmit: () => void;
 };
 
 export default function NewTaskDialogContent({
   title,
   description,
   taskDone,
+  heading,
+  submitLabel,
   onTitleChange,
   onDescriptionChange,
   onToggleTaskDone,
   statusMessage,
   statusType,
   onCancel,
-  onCreate,
+  onSubmit,
 }: NewTaskDialogContentProps) {
   return (
     <>
-      <h2 className="text-lg font-semibold">New Task</h2>
+      <h2 className="text-lg font-semibold">{heading}</h2>
       <div className="flex flex-col w-full gap-2">
         <div className="flex flex-col gap-2">
           <Label className="font-semibold">Title</Label>
@@ -78,10 +82,10 @@ export default function NewTaskDialogContent({
             Cancel
           </Button>
           <Button
-            onClick={onCreate}
+            onClick={onSubmit}
             className="px-4 py-1 rounded-lg text-white bg-stone-950 hover:bg-stone-700 hover:cursor-pointer"
           >
-            Create
+            {submitLabel}
           </Button>
         </div>
       </div>

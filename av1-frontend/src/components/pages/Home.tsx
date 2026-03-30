@@ -11,10 +11,13 @@ import { Frown } from "lucide-react";
 
 const filterOptions = ["all", "pending", "done"];
 export type Task = {
+  id: number;
   title: string;
   description: string;
   done: boolean;
 };
+
+type TaskForm = Omit<Task, "id">;
 
 type Feedback = {
   type: "error" | "success";
@@ -27,12 +30,36 @@ export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const modalRef = useRef<DialogHandle | null>(null);
   const [modal, setModal] = useState<boolean>(false);
-  const [task, setTask] = useState<Task>({
+  const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [task, setTask] = useState<TaskForm>({
     title: "",
     description: "",
     done: false,
   });
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+
+  function openModal() {
+    setModal(true);
+    modalRef.current?.showModal();
+  }
+
+  function closeModal() {
+    setModal(false);
+    setFeedback(null);
+    modalRef.current?.close();
+  }
+
+  function resetDialogForm() {
+    setTask({ title: "", description: "", done: false });
+    setDialogMode("create");
+    setEditingTaskId(null);
+  }
+
+  function handleOpenCreateModal() {
+    resetDialogForm();
+    openModal();
+  }
 
   async function createTask() {
     if (!task.title.trim() || !task.description.trim()) {
@@ -44,17 +71,16 @@ export default function Home() {
     }
 
     try {
-      await api.post("/tasks", task);
-      setTasksList((prev) => [...prev, task]);
+      const response = await api.post<Task>("/tasks", task);
+      setTasksList((prev) => [...prev, response.data]);
       setFeedback({
         type: "success",
         message: "Task created successfully.",
       });
 
       setTimeout(() => {
-        setTask({ title: "", description: "", done: false });
-        setFeedback(null);
-        handleModal();
+        resetDialogForm();
+        closeModal();
       }, 1200);
     } catch {
       setFeedback({
@@ -64,14 +90,75 @@ export default function Home() {
     }
   }
 
-  function handleModal() {
-    if (!modal) {
-      setModal(true);
-      modalRef.current?.showModal();
-    } else {
-      setModal(false);
+  async function handleOpenEditModal(taskId: number) {
+    try {
+      const response = await api.get<Task>(`/tasks/${taskId}`);
+      setDialogMode("edit");
+      setEditingTaskId(taskId);
+      setTask({
+        title: response.data.title,
+        description: response.data.description,
+        done: response.data.done,
+      });
       setFeedback(null);
-      modalRef.current?.close();
+      openModal();
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Could not load task data for editing. Please try again.",
+      });
+    }
+  }
+
+  async function updateTask() {
+    if (editingTaskId === null) return;
+
+    if (!task.title.trim() || !task.description.trim()) {
+      setFeedback({
+        type: "error",
+        message: "The title and description fields must not be empty.",
+      });
+      return;
+    }
+
+    try {
+      const response = await api.put<Task>(`/tasks/${editingTaskId}`, task);
+      setTasksList((prev) =>
+        prev.map((currentTask) =>
+          currentTask.id === editingTaskId ? response.data : currentTask,
+        ),
+      );
+      setFeedback({
+        type: "success",
+        message: "Task updated successfully.",
+      });
+
+      setTimeout(() => {
+        resetDialogForm();
+        closeModal();
+      }, 1200);
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Could not update task. Please try again.",
+      });
+    }
+  }
+
+  async function deleteTask(taskId: number) {
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this task?",
+    );
+    if (!shouldDelete) return;
+
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      setTasksList((prev) => prev.filter((task) => task.id !== taskId));
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Could not delete task. Please try again.",
+      });
     }
   }
 
@@ -118,13 +205,15 @@ export default function Home() {
         />
         <div className="flex flex-col h-full gap-4">
           {filteredTasks.length !== 0 ? (
-            filteredTasks.map((task, index) => (
+            filteredTasks.map((task) => (
               <Task
-                key={`${task.title}-${index}`}
+                key={task.id}
                 title={task.title}
                 description={task.description}
                 done={task.done}
                 className="flex flex-row items-center justify-between rounded-xl border border-gray-300 p-4 bg-gray-50"
+                onEdit={() => handleOpenEditModal(task.id)}
+                onDelete={() => deleteTask(task.id)}
               />
             ))
           ) : (
@@ -139,7 +228,7 @@ export default function Home() {
           )}
         </div>
         <AddTaskButton
-          onClick={handleModal}
+          onClick={handleOpenCreateModal}
           className="ml-auto p-2 rounded-full bg-stone-900 hover:cursor-pointer hover:bg-stone-800"
         />
       </div>
@@ -148,6 +237,8 @@ export default function Home() {
         className={`${modal ? "flex" : "none"} flex-col justify-center gap-4 m-auto h-fit w-1/3 p-4 rounded-xl open:shadow-2xl bg-gray-50`}
       >
         <NewTaskDialogContent
+          heading={dialogMode === "create" ? "New Task" : "Edit Task"}
+          submitLabel={dialogMode === "create" ? "Create" : "Save"}
           title={task.title}
           description={task.description}
           taskDone={task.done}
@@ -171,8 +262,8 @@ export default function Home() {
           }
           statusMessage={feedback?.message}
           statusType={feedback?.type}
-          onCancel={handleModal}
-          onCreate={createTask}
+          onCancel={closeModal}
+          onSubmit={dialogMode === "create" ? createTask : updateTask}
         />
       </Dialog>
     </>

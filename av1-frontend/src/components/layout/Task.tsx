@@ -6,6 +6,8 @@ type TaskProps = React.ComponentPropsWithoutRef<"div"> & {
   title: string;
   description: string;
   done: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
 };
 
 export default function Task({
@@ -13,6 +15,8 @@ export default function Task({
   title,
   description,
   done,
+  onEdit,
+  onDelete,
   ...rest
 }: TaskProps) {
   return (
@@ -26,8 +30,14 @@ export default function Task({
         <p className="text-sm opacity-70">{description}</p>
       </div>
       <div className="flex flex-row gap-4">
-        <Pencil className="text-gray-500 hover:bg-gray-50 hover:cursor-pointer" />
-        <Trash2 className="text-red-500 hover:bg-red-50 hover:cursor-pointer" />
+        <Pencil
+          onClick={onEdit}
+          className="text-gray-500 hover:bg-gray-50 hover:cursor-pointer"
+        />
+        <Trash2
+          onClick={onDelete}
+          className="text-red-500 hover:bg-red-50 hover:cursor-pointer"
+        />
       </div>
     </Card>
   );
