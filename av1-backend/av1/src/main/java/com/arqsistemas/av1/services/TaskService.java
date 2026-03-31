@@ -56,6 +56,14 @@ public class TaskService {
     }
 
     public void delete(Long id) {
-        this.taskRepository.deleteById(id);
+        Task task = this.taskRepository.findById(id).orElse(null);
+        
+        if (task != null) {
+            this.taskRepository.deleteById(id);
+            
+            for (TaskObserver observer : observers) {
+                observer.onTaskDeleted(task);
+            }
+        }
     }
 }
