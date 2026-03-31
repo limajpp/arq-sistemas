@@ -42,17 +42,24 @@ public class TaskService {
         for (TaskValidationStrategy strategy : taskValidationStrategies) {
             strategy.validateTask(task);
         }
-        
-        Task oldTask = this.taskRepository.findById(task.getId()).orElse(null);
-        Task updatedTask = this.taskRepository.save(task);
-        
-        if (oldTask != null) {
+
+        Task oldTaskFromDb = this.taskRepository.findById(task.getId()).orElse(null);
+        if (oldTaskFromDb != null) {
+            Task oldTaskSnapshot = new Task();
+            oldTaskSnapshot.setId(oldTaskFromDb.getId());
+            oldTaskSnapshot.setTitle(oldTaskFromDb.getTitle());
+            oldTaskSnapshot.setDescription(oldTaskFromDb.getDescription());
+            oldTaskSnapshot.setDone(oldTaskFromDb.isDone());
+
+            Task updatedTask = this.taskRepository.save(task);
             for (TaskObserver observer : observers) {
-                observer.onTaskUpdated(oldTask, updatedTask);
+                observer.onTaskUpdated(oldTaskSnapshot, updatedTask);
             }
+
+            return updatedTask;
         }
-        
-        return updatedTask;
+
+        return this.taskRepository.save(task);
     }
 
     public void delete(Long id) {
