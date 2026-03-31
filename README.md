@@ -2,7 +2,7 @@
 
 Este repositório contém o código-fonte do trabalho da disciplina de Projeto e Arquitetura de Sistemas. O projeto consiste em um sistema de gerenciamento de tarefas (To-Do List) desenvolvido com uma arquitetura dividida entre um backend em Java e um frontend em React.
 
-O sistema aplica os padrões de projeto estruturais e arquiteturais **GoF** (Strategy, Singleton) e **GRASP** (Controller, Information Expert) para garantir um código limpo, testável e de fácil manutenção.
+O sistema aplica os padrões de projeto estruturais e arquiteturais **GoF** (Strategy, Observer) e **GRASP** (Controller, Information Expert) para garantir um código limpo, testável e de fácil manutenção.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -51,7 +51,7 @@ O backend estará rodando e escutando requisições na porta 8080.
 * **API URL:** http://localhost:8080
 * **Documentação Swagger:** http://localhost:8080/swagger-ui.html
 
-> **Nota:** Como estamos utilizando o banco de dados H2, os dados são armazenados em memória e serão resetados sempre que o backend for reiniciado.
+> **Nota:** Como estamos utilizando o banco de dados H2, os dados são armazenados em memória e serão resetados sempre que o backend ou o frontend(Ainda não possui persistência de dados) forem reiniciados.
 
 ### 2. Rodando o Frontend (React + Vite)
 
@@ -78,7 +78,7 @@ Conforme os requisitos da disciplina, os seguintes padrões foram implementados 
 
 * **Strategy (GoF):** Utilizado para isolar as regras de validação da criação e atualização de tarefas (`TitleValidationStrategy` e `DescriptionValidationStrategy`), permitindo que novas regras sejam adicionadas sem alterar a classe de serviço principal.
 
-* **Singleton (GoF):** Gerenciado nativamente pelo contêiner de Injeção de Dependências do Spring Boot (`@Service`, `@RestController`, `@Component`), garantindo uma instância única das classes de serviço, controle e estratégias na memória.
+* **Observer (GoF):** Implementado para desacoplar a lógica de persistência de dados das ações secundárias do sistema. A classe `TaskService` atua como o sujeito observado que, após salvar uma nova tarefa com sucesso, notifica automaticamente uma lista de observadores (como o `LogTaskObserver`). Isso permite adicionar novas reações ao evento de criação (como envio de e-mails ou notificações) futuramente, sem modificar o código do serviço principal.
 
 * **Controller (GRASP):** Implementado através do `TaskController`, que atua como o ponto de entrada principal para as requisições HTTP da interface, delegando o processamento lógico para a camada de serviço.
 
